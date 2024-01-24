@@ -35,7 +35,7 @@
             minZoom: 6          // Zoom mini autorisé
         })
         // projetction de la carte avec centrage aux coordonnées indiquées, avec facteur d'agrandissement
-        .setView([47.495328, 6.8044455], 17)
+        .setView([47.495328, 6.8044455], 8)
 
         // Création d'un icone
         let myIcon = Leaflet.icon({
@@ -52,22 +52,22 @@
         let marker = Leaflet.marker([47.495328, 6.8044455], {icon: myIcon}).addTo(map)
 
         // Ajouter une popup / infobulle
-        marker.bindPopup('Je suis un marker')
+        marker.bindPopup('Tavue Montbéliard')
 
-        // Recentrage de la carte au bout de 5 secondes
+        // Recentrage de la carte au bout de 3 secondes
         // à une autre position
         setTimeout(
             function() {
-                map.panTo([47.50133850064826, 6.807621746718467])
+                map.panTo([47.24815063672275, 5.992373836856532])
             }, 5000
         )
 
         // ajout nouveau marker
         // à la position de recentrage
-        let marker2 = Leaflet.marker([47.50133850064826, 6.807621746718467], {icon: myIcon}).addTo(map)
+        let marker2 = Leaflet.marker([47.24815063672275, 5.992373836856532], {icon: myIcon}).addTo(map)
 
         // Ajouter une popup / infobulle
-        marker2.bindPopup('Je suis la gendarmerie nationale')
+        marker2.bindPopup('Agence Besançon')
 
     }) // Fin onMounted
 

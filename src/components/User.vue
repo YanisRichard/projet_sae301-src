@@ -1,114 +1,97 @@
 <script setup>
   // Import éléments de vue
-  import { ref,onMounted } from 'vue'
+  import { ref, onMounted } from 'vue';
+  // Import éléments de routage
+  import { useRouter } from 'vue-router';
+  const router = useRouter()
 
   // Import pocketbase
   import PocketBase from 'pocketbase'
+import Footer from './Footer.vue';
   // Objet pocketBase
-  const pb = new PocketBase("http://127.0.0.1:8090");
+  const pb = new PocketBase(import.meta.env.VITE_URL_POCKETBASE);
 
-  // import pour formatage des dates
-  import { format, parseISO } from 'date-fns'
+  
+  // user connecté ? au départ faux
+  let isConnected = ref(false)
 
-  // Liste des lunettes
-  let listeInfo = ref()
+  // Element de connexion
+  let user = ref('')
+  let psw = ref('')
 
-  // Création d'une nouvelle lunette
-  // Attention même structure que clle de PocketBase
-  let newUser = ref({
-    username : "",
-    email: "",
-  })
+  // User connecté
+  let currentUser = ref(null)
+  let avatar = ref(null)
 
-  // Au montage du composant
-  onMounted(async() => {
-    refresh()
-  }) // Fin de onMounted
+// Au montage du composant
+onMounted(async() => {
+  // Vérifier que le user est déjà connecté
+  refresh()
 
-  const refresh = async()=>{
-    listeInfo.value = await pb.collection('users').getFullList({ sort: 'nom' })
-    // Formattage des dates en français
-    listeInfo.value.forEach( (users)=>{
-      users.created = format(parseISO(user.created), "dd/MM/yyyy HH:mm:ss")
-      users.updated = format(parseISO(user.updated), "dd/MM/yyyy HH:mm:ss")
-    })
+})
+
+const refresh = ()=>{
+  if(pb.authStore.isValid){
+    currentUser.value = pb.authStore.model
+    isConnected.value = true
+    
+    avatar.value =
+      "http://127.0.0.1:8090/api/files/"  // Adresse serveur et repertoire des fichiers image
+      +currentUser.value.collectionId     // Id ou name de la collection concernée
+      +"/"
+      +currentUser.value.id               // Id de l'utilisateur connecté
+      +"/"
+      +currentUser.value.avatar           // Nom fichier image pocketbase
+      +"?thumb=100x100"                   // Taille par défaut     
+
+//      console.log("image avatar utilisateur", avatar)
   }
+}
 
-  const create = async()=>{
-    let result = await pb.collection('users').create(newUser.value)
-    console.log("result create", result)
-    refresh()
+const connect = async()=>{
+  try{
+    const authData = await pb.collection('users')
+    .authWithPassword(user.value, psw.value)
+//    console.log("connecté : ",authData)
+    refresh()    
+  }catch(error){
+//    console.log("erreur de connexion : ",error.message)
+    alert("Erreur d'identification : mauvais login et/ou mot de passe")
+    user.value = ""
+    psw.value = ""
   }
+}
 
-  const update = async(item)=>{
-    let result = await pb.collection('users').update(item.id, {
-      username : item.username,
-      email : item.email,
-      name : item.name,
-      avatar : item.avatar
-
-    })
-    console.log("result update", result)
-    refresh()
-  }
-
-  const del = async(item)=>{
-    let result = await pb.collection('lunettes').delete(item.id)
-    console.log("result delete", result)
-    refresh()
-  }
-
-
-
-
+const deconnect = ()=>{
+  // Suppression utilisateur connecté
+  pb.authStore.clear()
+  isConnected.value=false
+  avatar.value = null
+  // Retour à la page d'accueil -> Redirection
+  router.push({name:"HomeView"})
+}
 </script>
 
 <template>
-  <div class="container-fluid">
-    <h4>Mon compte</h4>
-    <hr/>
+  <div class="ml-auto m-5 p-5">              
+              <span v-if="isConnected"> 
+                <img :src="avatar" class="img-fluid mr-5" style="max-width:60px;" />
+                <button class="btn btn-light mr-5">
+                 Nom :  {{ currentUser.name }}
+                </button>
+                <button class="btn btn-light mr-5">
+                 Nom d'utilisateur :  {{ currentUser.username }}
+                </button> 
+                <button class="btn btn-light mr-5">
+                 Mail : {{ currentUser.email }}
+                </button> 
+              </span>
 
-    <!-- Table des Lunettes -->
-    <table class="table table-light">
-      <thead>
-        <tr>
-          <th>Nom d'utilisateur</th>
-          <th>Email</th>
-          <th>Nom</th>
-          <th>Avatar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in listeInfo" :key="item.id">
-          <td>
-            <input type="text" v-model="item.username" />
-          </td>
-          <td>
-            <input type="text" v-model="item.email" />
-          </td>
-          <td>
-            <input type="text" v-model="item.name" />
-          </td>
-          <td>
-            <input type="text" v-model="item.avatar" />
-          </td>
-          <td>
-            <div class="text-center">
-              <a href="#">
-                <i class="fa fa-edit fa-lg m-1" title="Mettre à jour" @click="update(item)"></i>
-              </a>
-              <a href="#">
-                <i class="fa fa-trash fa-lg m-1" title="Supprimer" @click="del(item)"></i>
-              </a>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    
-
+              
   </div>
+
+  
+
 </template>
 
 <style scoped>

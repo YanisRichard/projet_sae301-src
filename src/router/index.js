@@ -10,11 +10,12 @@ import AccueilView from             '../views/AccueilView.vue'
 import LoginView from             '../views/LoginView.vue'
 import UserView from             '../views/UserView.vue'
 import PanierView from             '../views/PanierView.vue'
+import FooterView from            '../views/FooterView.vue'
 
 // Import pocketbase
 import PocketBase from 'pocketbase'
 // Objet pocketBase
-const pb = new PocketBase("http://127.0.0.1:8090");
+const pb = new PocketBase(import.meta.env.VITE_URL_POCKETBASE);
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,10 +27,11 @@ const router = createRouter({
     { path: '/composant',     name: 'ComponentView',      component: ComponentView },
     { path: '/pocketbase01',  name: 'PocketBase01View',   component: PocketBase01View },
     { path: '/pocketbase02',  name: 'PocketBase02View',   component: PocketBase02View },
-    { path: '/accueil',  name: 'AccueilView',   component: AccueilView },
+    { path: '/accueil',  name: 'AccueilView',   component: AccueilView }, 
     { path: '/login',  name: 'LoginView',   component: LoginView },
     { path: '/user',  name: 'UserView',   component: UserView },
     { path: '/panier',  name: 'PanierView',   component: PanierView },
+    
   ]
 })
 
