@@ -10,5 +10,8 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  build: {
+    outDir: './pocketbase_SAE301_Yanis_RICHARD/pb_public'
   }
 })
